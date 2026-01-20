@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="StbImageSharp" Version="2.30.15" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="BoboEngine">
+      <HintPath>..\BoboEngine\bin\Debug\net8.0\BoboEngine.dll</HintPath>
+    </Reference>
+    <Reference Include="LCVR">
+      <HintPath>..\..\AppData\Roaming\r2modmanPlus-local\LethalCompany\profiles\HideAndSeek\BepInEx\plugins\DaXcess-LethalCompanyVR\LCVR\LCVR.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>
