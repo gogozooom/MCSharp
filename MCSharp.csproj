@@ -20,4 +20,8 @@
     </Reference>
   </ItemGroup>
 
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="xcopy $(ProjectDir)Bin-Dep $(TargetDir) /E /H /I /Y" />
+  </Target>
+
 </Project>

@@ -1,4 +1,4 @@
-﻿Post Build - xcopy $(ProjectDir)Bin-Dep $(TargetDir) /E /H /I /Y
+﻿Post Build - 
 
 Known Issues:
 	- Selection Outline clipping issues near corners and back of block
