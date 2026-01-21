@@ -142,11 +142,11 @@ public static class WorldChunkManager
         //FillBlocks(new(-25, -20, -25), new(25, -5, 25), "minecraft:stone", false);
         FillBlocks(new(-100, -21, -100), new(100, -21, 100), "minecraft:bedrock", false);
 
-        FillBlocks(new(-25, -20, 25), new(25, 15, 25), "minecraft:glass", false);
-        FillBlocks(new(-25, -20, -25), new(25, 15, -25), "minecraft:glass", false);
-        FillBlocks(new(25, -20, -25), new(25, 15, 25), "minecraft:glass", false);
-        FillBlocks(new(-25, -20, -25), new(-25, 15, 25), "minecraft:glass", false);
-        FillBlocks(new(-25, 15, -25), new(25, 15, 25), "minecraft:glass", false);
+        //FillBlocks(new(-25, -20, 25), new(25, 15, 25), "minecraft:glass", false);
+        //FillBlocks(new(-25, -20, -25), new(25, 15, -25), "minecraft:glass", false);
+        //FillBlocks(new(25, -20, -25), new(25, 15, 25), "minecraft:glass", false);
+        //FillBlocks(new(-25, -20, -25), new(-25, 15, 25), "minecraft:glass", false);
+        //FillBlocks(new(-25, 15, -25), new(25, 15, 25), "minecraft:glass", false);
 
         CreateChunkGenerationJob([.. _chunks.Values]);
     }

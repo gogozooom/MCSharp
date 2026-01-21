@@ -1,6 +1,4 @@
-﻿Post Build - 
-
-Known Issues:
+﻿Known Issues:
 	- Selection Outline clipping issues near corners and back of block
 		* Solution: Probably something to do with the blend flags origonally in minecraft
 	- Chunks not updating when under a lot of stress
