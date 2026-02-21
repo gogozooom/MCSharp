@@ -5,7 +5,6 @@ using Minecraft.Blocks;
 using Minecraft.Collision;
 using Minecraft.Debugging;
 using Minecraft.Entites;
-using System.Runtime.InteropServices;
 
 namespace Minecraft.World;
 public static class WorldChunkManager
@@ -684,7 +683,7 @@ public static class WorldChunkManager
 
         return (new(minX, minY, minZ), new(maxX, maxY, maxZ));
     }
-    public static void FillBlocks(Int3 p1, Int3 p2, string block_id, bool regenerate = true)
+    public static void FillBlocks(Int3 p1, Int3 p2, string block_id, bool regenerateMesh = true)
     {
         var (min, max) = PointsToMinMax(p1, p2);
 
@@ -710,11 +709,11 @@ public static class WorldChunkManager
             }
         }
 
-        if(regenerate)
+        if(regenerateMesh)
             CreateChunkGenerationJob(chunks);
     }
 
-    public static void FillCheckerPattern(Int3 p1, Int3 p2, string block_id1, string block_id2, bool regenerate = true)
+    public static void FillCheckerPattern(Int3 p1, Int3 p2, string block_id1, string block_id2, bool regenerateMesh = true)
     {
         var (min, max) = PointsToMinMax(p1, p2);
 
@@ -739,7 +738,7 @@ public static class WorldChunkManager
             }
         }
 
-        if (regenerate)
+        if (regenerateMesh)
             CreateChunkGenerationJob(chunks);
     }
 
