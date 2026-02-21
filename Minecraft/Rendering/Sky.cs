@@ -7,11 +7,12 @@ namespace Minecraft;
 public class Sky : ObjectBehavior
 {
     private Skybox skybox;
-    private TriangleFanMesh skyTop;
-    private TriangleFanMesh sunRiseSet;
+    private MeshRenderer skyTopRenderer;
+    private MeshRenderer sunRiseSetRenderer;
+    private TriangleFanMesh sunRiseSetMesh;
     private GameObject sun;
-    private Mesh moon;
-    private Mesh stars;
+    private MeshRenderer moonRenderer;
+    private MeshRenderer starsRenderer;
 
     private Float3 fog_Color = new(1,0,1);
     private Float3 sky_Color = new(0.9f,0.1f,1);
@@ -31,49 +32,64 @@ public class Sky : ObjectBehavior
 
         // Sky Top
 
-        skyTop = new GameObject("SkyTop").AddComponent<TriangleFanMesh>();
+        var skyTop = new GameObject("SkyTop");
         skyTop.transform.parent = transform;
-        skyTop.LoadRawData(BuildSkyDisc(16));
-        skyTop.material = new Material("SkyDim", transformMode: RenderTranformMode.LocalTransform, useDepth: false, renderOrder: -5);
+
+        var skyTopMesh = new TriangleFanMesh();
+        skyTopMesh.LoadRawData(BuildSkyDisc(16));
+
+        skyTop.AddComponent<MeshFilter>().mesh = skyTopMesh;
+        skyTopRenderer = skyTop.AddComponent<MeshRenderer>();
+        skyTopRenderer.material = new Material("SkyDim", transformMode: RenderTranformMode.LocalTransform, useDepth: false, renderOrder: -5);
 
         // Sun Riseset
 
-        sunRiseSet = new GameObject("SunRiseSet").AddComponent<TriangleFanMesh>();
+        var sunRiseSet = new GameObject("SunRiseSet");
         sunRiseSet.transform.parent = transform;
-        sunRiseSet.material = new Material("SunRise", transformMode: RenderTranformMode.LocalTransform, useDepth: false, renderOrder: -4);
+
+        sunRiseSetMesh = new TriangleFanMesh();
+
+        sunRiseSet.AddComponent<MeshFilter>().mesh = sunRiseSetMesh;
+        sunRiseSetRenderer = sunRiseSet.AddComponent<MeshRenderer>();
+        sunRiseSetRenderer.material = new Material("SunRise", transformMode: RenderTranformMode.LocalTransform, useDepth: false, renderOrder: -4);
 
         // Sun
 
         sun = new GameObject("Sun");
-
         sun.transform.parent = transform;
-        Mesh sunMesh = sun.AddComponent<Mesh>();
 
+        Mesh sunMesh = new Mesh();
         var sunMeshGenerated = BuildPlane(30, 100);
-
         sunMesh.LoadRawData(sunMeshGenerated.vertices, sunMeshGenerated.faces, sunMeshGenerated.normals, sunMeshGenerated.textureCoords);
-        sunMesh.material = new Material(texture: new Texture2D(TextureManager.GetPathToTexture("environment\\sun.png"), "sun", TextureSampleType.Nearest), blendMode: BlendMode.Blend, useDepth: false, transformMode: RenderTranformMode.LocalTransform, renderOrder: -3);
+
+        sun.AddComponent<MeshFilter>().mesh = sunMesh;
+        sun.AddComponent<MeshRenderer>().material = new Material(texture: new Texture2D(TextureManager.GetPathToTexture("environment\\sun.png"), "sun", TextureSampleType.Nearest), blendMode: BlendMode.Blend, useDepth: false, transformMode: RenderTranformMode.LocalTransform, renderOrder: -3);
 
         // Moon
 
-        moon = new GameObject("Moon").AddComponent<Mesh>();
-
+        var moon = new GameObject("Moon");
         moon.transform.parent = transform;
 
+        Mesh moonMesh = new Mesh();
         var moonMeshGenerated = BuildPlane(20, 100, true);
+        moonMesh.LoadRawData(moonMeshGenerated.vertices, moonMeshGenerated.faces, moonMeshGenerated.normals, moonMeshGenerated.textureCoords);
 
-        moon.LoadRawData(moonMeshGenerated.vertices, moonMeshGenerated.faces, moonMeshGenerated.normals, moonMeshGenerated.textureCoords);
-        moon.material = new Material("Moon", texture: new Texture2DArray(TextureManager.GetPathToTexture("environment\\moon_phases.png"), "moon", 32, 32, TextureSampleType.Nearest), blendMode: BlendMode.Blend, useDepth: false, transformMode: RenderTranformMode.LocalTransform, renderOrder: -2);
-        moon.material.SetFloat("phase", 0);
-
+        moon.AddComponent<MeshFilter>().mesh = moonMesh;
+        moonRenderer = moon.AddComponent<MeshRenderer>();
+        moonRenderer.material = new Material("Moon", texture: new Texture2DArray(TextureManager.GetPathToTexture("environment\\moon_phases.png"), "moon", 32, 32, TextureSampleType.Nearest), blendMode: BlendMode.Blend, useDepth: false, transformMode: RenderTranformMode.LocalTransform, renderOrder: -2);
+        moonRenderer.material.SetFloat("phase", 0);
 
         // Stars
 
-        stars = new GameObject("Stars").AddComponent<Mesh>();
-
+        var stars = new GameObject("Stars");
         stars.transform.parent = transform;
-        BuildStars();
-        stars.material = new Material("Stars", blendMode: BlendMode.Blend, useDepth:false, transformMode: RenderTranformMode.LocalTransform, renderOrder: -1);
+
+        Mesh starsMesh = new Mesh();
+        var starsMeshGenerated = BuildStars();
+        starsMesh.LoadRawData(starsMeshGenerated.verticies, starsMeshGenerated.faces);
+
+        starsRenderer = stars.AddComponent<MeshRenderer>();
+        starsRenderer.material = new Material("Stars", blendMode: BlendMode.Blend, useDepth:false, transformMode: RenderTranformMode.LocalTransform, renderOrder: -1);
 
         // Load Biome Colors
 
@@ -102,18 +118,18 @@ public class Sky : ObjectBehavior
         float angleFromY = TimeOfDay.GetTimeOfDay() * 360;
 
         sun.transform.rotation = new(y: -90, x: -angleFromY - 180);
-        moon.transform.rotation = new(y: -90, x: -angleFromY);
-        stars.transform.rotation = new(y: -90, z: -angleFromY);
+        moonRenderer.transform.rotation = new(y: -90, x: -angleFromY);
+        starsRenderer.transform.rotation = new(y: -90, z: -angleFromY);
 
         var skyColor = GetSkyColor(angleFromY);
         var fogColor = ComputeFogColor(angleFromY, 12);
 
         skybox.skyColor = fogColor;
 
-        skyTop.material.SetVec3("skyColor", skyColor);
-        skyTop.material.SetVec3("fogColor", fogColor);
+        skyTopRenderer.material.SetVec3("skyColor", skyColor);
+        skyTopRenderer.material.SetVec3("fogColor", fogColor);
 
-        stars.material.SetFloat("brightness", GetStarBrightness(angleFromY));
+        starsRenderer.material.SetFloat("brightness", GetStarBrightness(angleFromY));
 
         if (IsSunriseOrSunset(angleFromY))
         {
@@ -121,22 +137,22 @@ public class Sky : ObjectBehavior
 
             float a = Maths.Sin(-angleFromY) < 0.0F ? 180.0F : 0.0F;
 
-            sunRiseSet.transform.rotation = new(90, 0, a + 90);
+            sunRiseSetRenderer.transform.rotation = new(90, 0, a + 90);
 
-            sunRiseSet.gameObject.enabled = true;
-            sunRiseSet.material.SetVec4("color", color);
+            sunRiseSetRenderer.gameObject.enabled = true;
+            sunRiseSetRenderer.material.SetVec4("color", color);
             GenerateSunriseset(color.a);
         }
         else
         {
-            sunRiseSet.gameObject.enabled = false;
+            sunRiseSetRenderer.gameObject.enabled = false;
         }
 
         SetMoonPhase(Maths.Mod(TimeOfDay.time / 24000, 8));
     }
 
     // Minecraft Functions!!!
-    private void BuildStars()
+    private (Float3[] verticies, FaceInfo[] faces) BuildStars()
     {
         List<Float3> verticies = new();
 
@@ -177,7 +193,7 @@ public class Sky : ObjectBehavior
             }
         }
 
-        stars.LoadRawData(verticies.ToArray(), faces.ToArray());
+        return (verticies.ToArray(), faces.ToArray());
     }
     private (Float3[] vertices, FaceInfo[] faces, Float3[] normals, Float2[] textureCoords) BuildPlane(float width, float distance, bool flipTextureCoords = false)
     {
@@ -274,8 +290,8 @@ public class Sky : ObjectBehavior
             colors.Add(new(1, 1, 1, 0));
         }
 
-        sunRiseSet.DeleteMesh();
-        sunRiseSet.LoadRawData(vertices.ToArray(), colors.ToArray());
+        sunRiseSetMesh.DeleteMesh();
+        sunRiseSetMesh.LoadRawData(vertices.ToArray(), colors.ToArray());
     }
     public bool IsSunriseOrSunset(float angleFromY)
     {
@@ -386,6 +402,6 @@ public class Sky : ObjectBehavior
 
     public void SetMoonPhase(float value)
     {
-        moon.material.SetFloat("phase", value);
+        moonRenderer.material.SetFloat("phase", value);
     }
 }

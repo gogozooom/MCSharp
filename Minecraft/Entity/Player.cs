@@ -31,11 +31,11 @@ public class Player : LivingEntity
     public float yBobOld;
     public float xBobOld;
 
-    public Mesh boxSelectionMesh;
+    public MeshRenderer boxSelectionRenderer;
     public BlockRaycastHit lastHit;
     public string blockSelected = "minecraft:dirt";
 
-    Mesh colliderMesh;
+    //MeshRenderer colliderRenderer;
 
     Input.MouseMapping keyUse;
     Input.MouseMapping keyAttack;
@@ -62,19 +62,23 @@ public class Player : LivingEntity
 
         base.Start();
 
-        colliderMesh = CreateDebugMesh((Float3)boundingBoxSize);
-        colliderMesh.gameObject.enabled = debugCollisions;
+        //colliderRenderer = CreateDebugMesh((Float3)boundingBoxSize);
+        //colliderRenderer.gameObject.enabled = debugCollisions;
 
-        boxSelectionMesh = new GameObject("BoxSelection").AddComponent<Mesh>();
+        boxSelectionRenderer = new GameObject("BoxSelection").AddComponent<MeshRenderer>();
+
+        var boxSelectionMesh = new Mesh();
 
         boxSelectionMesh.LoadObjFile(Engine.GetLocalModelPath("CubeOutline"));
+
+        boxSelectionRenderer.gameObject.GetComponent<MeshFilter>().mesh = boxSelectionMesh;
 
         string shaderID = "boxSelect";
 
         ShaderManager.EnsureShader(shaderID, "Shader/boxSelectionShader.vert", "Shader/boxSelectionShader.frag");
 
-        boxSelectionMesh.material = new Material(shaderID, cullBackFaces: false, renderOrder: 1);
-        boxSelectionMesh.material.SetVec4("Color", new(0, 0, 0, 0.4f));
+        boxSelectionRenderer.material = new Material(shaderID, cullBackFaces: false, renderOrder: 1);
+        boxSelectionRenderer.material.SetVec4("Color", new(0, 0, 0, 0.4f));
 
         Cursor.mode = CursorMode.Disabled;
     }
@@ -92,7 +96,7 @@ public class Player : LivingEntity
         cam.position = (Float3)GetEyePos();
         cam.rotation = new(rotation.x, rotation.y);
 
-        colliderMesh.transform.position = transform.position;
+        //colliderRenderer.transform.position = transform.position;
     }
     public void UpdateRaycast()
     {
@@ -100,13 +104,13 @@ public class Player : LivingEntity
 
         if (lastHit)
         {
-            boxSelectionMesh.gameObject.enabled = true;
-            boxSelectionMesh.transform.position = lastHit.blockPosition + new Float3(0.5f, 0.5f, 0.5f);
-            boxSelectionMesh.material.SetVec2("ScreenSize", WindowManager.WindowSize); // TODO: Maybe only fire when the screen size actually changes
+            boxSelectionRenderer.gameObject.enabled = true;
+            boxSelectionRenderer.transform.position = lastHit.blockPosition + new Float3(0.5f, 0.5f, 0.5f);
+            boxSelectionRenderer.material.SetVec2("ScreenSize", WindowManager.WindowSize); // TODO: Maybe only fire when the screen size actually changes
         }
         else
         {
-            boxSelectionMesh.gameObject.enabled = false;
+            boxSelectionRenderer.gameObject.enabled = false;
         }
     }
 
@@ -315,7 +319,7 @@ public class Player : LivingEntity
     #region Movement Methods
     protected bool CanPlayerFitWithinBlocksAndEntitiesWhen(Pose newPose)
     {
-        BoundingBox bb = GetBoundingBox(newPose).Deflate(1.0E-7);
+        BoundingBox bb = GetBoundingBox(newPose).Deflate(1.0E-6);
 
         return WorldChunkManager.NoCollision(this, bb);
     }
@@ -560,7 +564,7 @@ public class Player : LivingEntity
 
         Int3 blockToChange = (Int3)(lastHit.blockPosition + lastHit.blockFace.GetNormal());
 
-        if(WorldChunkManager.IsBlockInBoundingBox(blockToChange, blockSelected, GetBoundingBox())) return;
+        if(WorldChunkManager.IsBlockInBoundingBox(blockToChange, blockSelected, GetBoundingBox().Deflate(1.0E-6))) return;
 
         placeDelay = 4;
 

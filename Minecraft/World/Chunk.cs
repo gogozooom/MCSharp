@@ -1,6 +1,5 @@
 ﻿using BoboEngine;
 using Minecraft.Blocks;
-using System.Runtime.InteropServices;
 
 namespace Minecraft.World;
 public class Chunk : ObjectBehavior
@@ -23,13 +22,14 @@ public class Chunk : ObjectBehavior
 
     public override void Start()
     {
-        _connectedMesh = gameObject.GetComponent<ChunkMesh>();
+        _connectedMesh = new ChunkMesh();
 
-        if (!_connectedMesh)
-        {
-            _connectedMesh = gameObject.AddComponent<ChunkMesh>();
-            _connectedMesh.material = WorldChunkManager.meshMaterial;
-        }
+        var meshRenderer = gameObject.RequireComponent<MeshRenderer>();
+        meshRenderer.material = WorldChunkManager.meshMaterial;
+
+        var meshFilter = gameObject.GetComponent<MeshFilter>();
+
+        meshFilter.mesh = _connectedMesh;
     }
     public void ClearChunk() => _chunkData.Clear();
 

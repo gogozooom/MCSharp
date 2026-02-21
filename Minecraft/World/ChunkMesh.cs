@@ -21,7 +21,7 @@ public class ChunkMesh : Mesh
         this.textureCoords = textureCoords ?? ([]);
     }
 
-    protected override float[] glConvertToData()
+    protected override (float[] data, uint vertexBufferSize) glConvertToData()
     {
         var vertexData = new float[faces.Length * 39];
 
@@ -62,9 +62,7 @@ public class ChunkMesh : Mesh
             }
         }
 
-        vertexBufferSize = (uint)faces.Length * 3;
-
-        return vertexData;
+        return (vertexData, (uint)faces.Length * 3);
     }
     protected override unsafe void glBindPointers()
     {

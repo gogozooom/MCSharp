@@ -15,7 +15,7 @@ public abstract class Entity : ObjectBehavior
     private double oldEyeHeight;
     public bool noGravity;
 
-    public bool debugCollisions = false;
+    //public bool debugCollisions = false;
 
     // Placement
     public Double3 deltaMovement;
@@ -119,24 +119,25 @@ public abstract class Entity : ObjectBehavior
     {
         List<VoxelShape> colliders = CollectColliders(source, entityColliders, boundingBox.ExpandTowards(movement));
 
-        source.ResetDebugMeshes();
+        // Mesh Debugging
+        //source.ResetDebugMeshes();
 
-        if (source.debugCollisions)
-        {
-            int i = 0;
+        //if (source.debugCollisions)
+        //{
+        //    int i = 0;
 
-            foreach (var collider in colliders)
-            {
-                foreach (var shape in collider.shapes)
-                {
-                    var mesh = source.GetInactiveDebugMesh(colliders.Count, i);
+        //    foreach (var collider in colliders)
+        //    {
+        //        foreach (var shape in collider.shapes)
+        //        {
+        //            var mesh = source.GetInactiveDebugMesh(colliders.Count, i);
 
-                    mesh.transform.scale = (Float3)(shape.localFrom - shape.localTo);
-                    mesh.transform.position = collider.position + (Float3)shape.localFrom;
-                }
-                i++;
-            }
-        }
+        //            mesh.transform.scale = (Float3)(shape.localFrom - shape.localTo);
+        //            mesh.transform.position = collider.position + (Float3)shape.localFrom;
+        //        }
+        //        i++;
+        //    }
+        //}
 
         return CollideWithShapes(movement, boundingBox, colliders);
     }
@@ -443,136 +444,136 @@ public abstract class Entity : ObjectBehavior
     #endregion
 
     #region Debugging
-    private static readonly List<Mesh> debugVisualsInactive = new();
-    private static readonly List<Mesh> debugVisualsActive = new();
-    private static Mesh oneFrameBoundingBox;
-    public Mesh GetInactiveDebugMesh(int totalCount = 0, int colliderIndex = 0)
-    {
-        Mesh mesh;
-        if (debugVisualsInactive.Count == 0)
-        {
-            mesh = CreateDebugMesh(Int3.one, false);
-            debugVisualsActive.Add(mesh);
-        }
-        else
-        {
-            mesh = debugVisualsInactive[^1];
-            debugVisualsInactive.Remove(mesh);
-            mesh.gameObject.enabled = true;
-            debugVisualsActive.Add(mesh);
-        }
+    //private static readonly List<Mesh> debugVisualsInactive = new();
+    //private static readonly List<Mesh> debugVisualsActive = new();
+    //private static Mesh oneFrameBoundingBox;
+    //public Mesh GetInactiveDebugMesh(int totalCount = 0, int colliderIndex = 0)
+    //{
+    //    Mesh mesh;
+    //    if (debugVisualsInactive.Count == 0)
+    //    {
+    //        mesh = CreateDebugMesh(Int3.one, false);
+    //        debugVisualsActive.Add(mesh);
+    //    }
+    //    else
+    //    {
+    //        mesh = debugVisualsInactive[^1];
+    //        debugVisualsInactive.Remove(mesh);
+    //        mesh.gameObject.enabled = true;
+    //        debugVisualsActive.Add(mesh);
+    //    }
 
-        mesh.material.SetVec4("Color", new Float4(0, (float)colliderIndex / totalCount, 0, 1));
-        mesh.material.renderOrder = debugVisualsActive.Count + 1;
-        return mesh;
-    }
-    public void ResetDebugMeshes()
-    {
-        debugVisualsInactive.AddRange(debugVisualsActive);
+    //    mesh.material.SetVec4("Color", new Float4(0, (float)colliderIndex / totalCount, 0, 1));
+    //    mesh.material.renderOrder = debugVisualsActive.Count + 1;
+    //    return mesh;
+    //}
+    //public void ResetDebugMeshes()
+    //{
+    //    debugVisualsInactive.AddRange(debugVisualsActive);
 
-        foreach (var item in debugVisualsActive)
-        {
-            item.gameObject.enabled = false;
-        }
+    //    foreach (var item in debugVisualsActive)
+    //    {
+    //        item.gameObject.enabled = false;
+    //    }
 
-        debugVisualsActive.Clear();
-    }
-    public void CreateOneFrameDebugMesh(BoundingBox bb)
-    {
-        if (oneFrameBoundingBox)
-        {
-            oneFrameBoundingBox.gameObject.Destroy();
-            oneFrameBoundingBox = null;
-        }
+    //    debugVisualsActive.Clear();
+    //}
+    //public void CreateOneFrameDebugMesh(BoundingBox bb)
+    //{
+    //    if (oneFrameBoundingBox)
+    //    {
+    //        oneFrameBoundingBox.gameObject.Destroy();
+    //        oneFrameBoundingBox = null;
+    //    }
 
-        var pos = new Double3((bb.maxX + bb.minX) / 2, bb.minY, (bb.maxZ + bb.minZ) / 2);
-        var size = new Double3(bb.maxX - bb.minX, bb.maxY - bb.minY, bb.maxZ - bb.minZ);
+    //    var pos = new Double3((bb.maxX + bb.minX) / 2, bb.minY, (bb.maxZ + bb.minZ) / 2);
+    //    var size = new Double3(bb.maxX - bb.minX, bb.maxY - bb.minY, bb.maxZ - bb.minZ);
 
-        oneFrameBoundingBox = CreateDebugMesh((Float3)size);
-        oneFrameBoundingBox.material.SetVec4("Color", new(1, 0, 0, 1));
-        oneFrameBoundingBox.transform.position = (Float3)pos;
-    }
-    public Mesh CreateDebugMesh(Float3 size, bool center = true)
-    {
-        string shaderID = "boxSelect";
+    //    oneFrameBoundingBox = CreateDebugMesh((Float3)size);
+    //    oneFrameBoundingBox.material.SetVec4("Color", new(1, 0, 0, 1));
+    //    oneFrameBoundingBox.transform.position = (Float3)pos;
+    //}
+    //public Mesh CreateDebugMesh(Float3 size, bool center = true)
+    //{
+    //    string shaderID = "boxSelect";
 
-        ShaderManager.EnsureShader(shaderID, "Shader/boxSelectionShader.vert", "Shader/boxSelectionShader.frag");
+    //    ShaderManager.EnsureShader(shaderID, "Shader/boxSelectionShader.vert", "Shader/boxSelectionShader.frag");
 
-        var debugMesh = new GameObject("DebugMesh").AddComponent<Mesh>();
+    //    var debugMesh = new GameObject("DebugMesh").AddComponent<Mesh>();
 
-        var (verticies, faces, normals) = BuildColliderMeshVisual(size, center);
+    //    var (verticies, faces, normals) = BuildColliderMeshVisual(size, center);
 
-        debugMesh.LoadRawData(verticies, faces, normals);
+    //    debugMesh.LoadRawData(verticies, faces, normals);
 
-        debugMesh.material = new Material(shaderID, cullBackFaces: false, useDepth: false, renderOrder: 1);
-        debugMesh.material.SetVec4("Color", new(1, 1, 1, 1));
+    //    debugMesh.material = new Material(shaderID, cullBackFaces: false, useDepth: false, renderOrder: 1);
+    //    debugMesh.material.SetVec4("Color", new(1, 1, 1, 1));
 
-        return debugMesh;
-    }
-    protected static (Float3[] verticies, FaceInfo[] faces, Float3[] normals) BuildColliderMeshVisual(Float3 size, bool center = true)
-    {
-        Float3[] verticies;
+    //    return debugMesh;
+    //}
+    //protected static (Float3[] verticies, FaceInfo[] faces, Float3[] normals) BuildColliderMeshVisual(Float3 size, bool center = true)
+    //{
+    //    Float3[] verticies;
 
-        if (center)
-        {
-            Float3 hSize = size / 2;
+    //    if (center)
+    //    {
+    //        Float3 hSize = size / 2;
 
-            verticies =
-                [
-                new(-hSize.x, 0,-hSize.z),
-                new( hSize.x, 0,-hSize.z),
-                new(-hSize.x, 0, hSize.z),
-                new( hSize.x, 0, hSize.z),
-                new(-hSize.x, size.y,-hSize.z),
-                new( hSize.x, size.y,-hSize.z),
-                new(-hSize.x, size.y, hSize.z),
-                new( hSize.x, size.y, hSize.z),
-            ];
-        }
-        else
-        {
-            verticies =
-                [
-                new(0,      0,      0),
-                new(-size.x, 0,      0),
-                new(0,      0,      -size.z),
-                new(-size.x, 0,      -size.z),
-                new(0,      -size.y, 0),
-                new(-size.x, -size.y, 0),
-                new(0,      -size.y, -size.z),
-                new(-size.x, -size.y, -size.z),
-            ];
-        }
-        Float3[] normals =
-            [
-                new Float3(1,0,0),
-                new Float3(0,1,0),
-                new Float3(0,0,1),
-            ];
-        string[] faceInfo =
-            [
-            "f 1/1/1 1/1/1 2/1/1 2/1/1",
-            "f 3/1/1 3/1/1 4/1/1 4/1/1",
-            "f 5/1/1 5/1/1 6/1/1 6/1/1",
-            "f 7/1/1 7/1/1 8/1/1 8/1/1",
-            "f 1/1/2 1/1/2 5/1/2 5/1/2",
-            "f 2/1/2 2/1/2 6/1/2 6/1/2",
-            "f 3/1/2 3/1/2 7/1/2 7/1/2",
-            "f 4/1/2 4/1/2 8/1/2 8/1/2",
-            "f 1/1/3 1/1/3 3/1/3 3/1/3",
-            "f 2/1/3 2/1/3 4/1/3 4/1/3",
-            "f 5/1/3 5/1/3 7/1/3 7/1/3",
-            "f 6/1/3 6/1/3 8/1/3 8/1/3"
-            ];
+    //        verticies =
+    //            [
+    //            new(-hSize.x, 0,-hSize.z),
+    //            new( hSize.x, 0,-hSize.z),
+    //            new(-hSize.x, 0, hSize.z),
+    //            new( hSize.x, 0, hSize.z),
+    //            new(-hSize.x, size.y,-hSize.z),
+    //            new( hSize.x, size.y,-hSize.z),
+    //            new(-hSize.x, size.y, hSize.z),
+    //            new( hSize.x, size.y, hSize.z),
+    //        ];
+    //    }
+    //    else
+    //    {
+    //        verticies =
+    //            [
+    //            new(0,      0,      0),
+    //            new(-size.x, 0,      0),
+    //            new(0,      0,      -size.z),
+    //            new(-size.x, 0,      -size.z),
+    //            new(0,      -size.y, 0),
+    //            new(-size.x, -size.y, 0),
+    //            new(0,      -size.y, -size.z),
+    //            new(-size.x, -size.y, -size.z),
+    //        ];
+    //    }
+    //    Float3[] normals =
+    //        [
+    //            new Float3(1,0,0),
+    //            new Float3(0,1,0),
+    //            new Float3(0,0,1),
+    //        ];
+    //    string[] faceInfo =
+    //        [
+    //        "f 1/1/1 1/1/1 2/1/1 2/1/1",
+    //        "f 3/1/1 3/1/1 4/1/1 4/1/1",
+    //        "f 5/1/1 5/1/1 6/1/1 6/1/1",
+    //        "f 7/1/1 7/1/1 8/1/1 8/1/1",
+    //        "f 1/1/2 1/1/2 5/1/2 5/1/2",
+    //        "f 2/1/2 2/1/2 6/1/2 6/1/2",
+    //        "f 3/1/2 3/1/2 7/1/2 7/1/2",
+    //        "f 4/1/2 4/1/2 8/1/2 8/1/2",
+    //        "f 1/1/3 1/1/3 3/1/3 3/1/3",
+    //        "f 2/1/3 2/1/3 4/1/3 4/1/3",
+    //        "f 5/1/3 5/1/3 7/1/3 7/1/3",
+    //        "f 6/1/3 6/1/3 8/1/3 8/1/3"
+    //        ];
 
-        List<FaceInfo> faces = new();
+    //    List<FaceInfo> faces = new();
 
-        foreach (var face in faceInfo)
-        {
-            faces.AddRange(FaceInfo.GetTriangulatedFaces(face));
-        }
+    //    foreach (var face in faceInfo)
+    //    {
+    //        faces.AddRange(FaceInfo.GetTriangulatedFaces(face));
+    //    }
 
-        return (verticies, faces.ToArray(), normals);
-    }
+    //    return (verticies, faces.ToArray(), normals);
+    //}
     #endregion
 }
