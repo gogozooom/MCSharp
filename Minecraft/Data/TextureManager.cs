@@ -9,8 +9,6 @@ public static class TextureManager
     public static Dictionary<string, int> blockTextureIds { get; private set; }
     public static void GenerateAtlas()
     {
-        StbImage.stbi_set_flip_vertically_on_load(1);
-
         List<ImageResult> images = [Texture.ReadImageFile(Engine.GetLocalTexturePath("NULL"), ColorComponents.RedGreenBlueAlpha)];
         blockTextureIds = new Dictionary<string, int> { { "minecraft:null", 0 } };
 
