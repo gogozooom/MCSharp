@@ -10,6 +10,8 @@
 	
 TODO:
 
+	- Hotbar!
+
 	- Add perspective toggle
 	- Add player model
 
@@ -17,7 +19,6 @@ TODO:
 
 	- World Generation (Flat world)
 	- Save File Loading (Real Minecraft loaded into fake Minecraft)
-	- UI support
 	- Particle support
 	- Block model rotation and properties
 
