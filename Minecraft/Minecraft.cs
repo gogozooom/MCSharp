@@ -1,6 +1,7 @@
 ﻿using BoboEngine;
 using ConsoleCommand;
 using Minecraft.Entites;
+using Minecraft.UI;
 using Minecraft.World;
 
 namespace Minecraft;
@@ -33,7 +34,7 @@ public static class Minecraft
     {
         WorldChunkManager.GenerateTestChunk();
         SceneManager.currentScene.skybox.gameObject.AddComponent<Sky>();
-
+        new GameObject("UIManager").AddComponent<UIManager>();
         new GameObject("Player").AddComponent<Player>();
 
         if (ticker != null)
