@@ -39,7 +39,7 @@ public static class Minecraft
 
         if (ticker != null)
         {
-            Engine .LogError("Cannot start another tick timer!");
+            Engine.LogError("Cannot start another tick timer!");
             return;
         }
         ticker = Task.Run(Ticker);
