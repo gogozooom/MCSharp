@@ -33,7 +33,8 @@ public class Player : LivingEntity
 
     public MeshRenderer boxSelectionRenderer;
     public BlockRaycastHit lastHit;
-    public string blockSelected = "minecraft:dirt";
+    public static int slotSelected = 0;
+    public static string[] hotbar = { "minecraft:dirt", "minecraft:air", "minecraft:air", "minecraft:air", "minecraft:air", "minecraft:air", "minecraft:air", "minecraft:air", "minecraft:air" };
 
     //MeshRenderer colliderRenderer;
 
@@ -59,6 +60,7 @@ public class Player : LivingEntity
         keyUse = Input.GetMouseMapping(MouseButton.Right);
         keyAttack = Input.GetMouseMapping(MouseButton.Left);
         keyPickItem = Input.GetMouseMapping(MouseButton.Middle);
+        Cursor.onScroll += OnScroll;
 
         base.Start();
 
@@ -81,6 +83,13 @@ public class Player : LivingEntity
         boxSelectionRenderer.material.SetVec4("Color", new(0, 0, 0, 0.4f));
 
         Cursor.mode = CursorMode.Disabled;
+    }
+    private void OnScroll(Float2 v)
+    {
+        slotSelected -= (int)v.y;
+
+        if (slotSelected < 0) slotSelected = 8;
+        if (slotSelected > 8) slotSelected = 0;
     }
     public override void Update()
     {
@@ -564,13 +573,13 @@ public class Player : LivingEntity
 
         Int3 blockToChange = (Int3)(lastHit.blockPosition + lastHit.blockFace.GetNormal());
 
-        if(WorldChunkManager.IsBlockInBoundingBox(blockToChange, blockSelected, GetBoundingBox().Deflate(1.0E-6))) return;
+        if(WorldChunkManager.IsBlockInBoundingBox(blockToChange, hotbar[slotSelected], GetBoundingBox().Deflate(1.0E-6))) return;
 
         placeDelay = 4;
 
         //Program.Log("Place Block!");
 
-        WorldChunkManager.SetBlock(blockToChange, blockSelected);
+        WorldChunkManager.SetBlock(blockToChange, hotbar[slotSelected]);
         UpdateRaycast();
     }
     private void DestroyBlock()
@@ -594,8 +603,8 @@ public class Player : LivingEntity
 
         if (Instance.lastHit.blockHit.block_id == "minecraft:bedrock") return;
 
-        Instance.blockSelected = Instance.lastHit.blockHit.block_id;
-        Engine.Log($"Selected: '{Instance.blockSelected}'");
+        hotbar[slotSelected] = Instance.lastHit.blockHit.block_id;
+        Engine.Log($"Selected: '{hotbar[slotSelected]}'");
     }
 
     #endregion
@@ -624,7 +633,7 @@ public class Player : LivingEntity
     {
         if (!type.Contains(':')) type = "minecraft:" + type;
 
-        Instance.blockSelected = type;
+        hotbar[slotSelected] = type;
         Engine.Log($"Selected: '{type}'");
     }
 
