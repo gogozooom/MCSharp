@@ -37,7 +37,7 @@ public class Chunk : ObjectBehavior
     public int currentJobID { get; private set; }
 
     private List<Float3> GenerateMesh_vertices;
-    private List<ChunkFaceInfo> GenerateMesh_faces;
+    private List<MeshFace> GenerateMesh_faces;
     private List<Float2> GenerateMesh_textureCoords;
     private List<Float3> GenerateMesh_normals = [
         BlockFace.GetNormal(BlockDirection.WEST),
@@ -47,6 +47,8 @@ public class Chunk : ObjectBehavior
             BlockFace.GetNormal(BlockDirection.NORTH),
             BlockFace.GetNormal(BlockDirection.SOUTH),
             ];
+    private List<int> GenerateMesh_textureIdIndices;
+    private List<Float4> GenerateMesh_occlusionLevels;
 
     private object _lock = new();
 
@@ -78,6 +80,8 @@ public class Chunk : ObjectBehavior
         GenerateMesh_vertices = new();
         GenerateMesh_faces = new();
         GenerateMesh_textureCoords = new();
+        GenerateMesh_textureIdIndices = new();
+        GenerateMesh_occlusionLevels = new();
 
         int elementIndex = 0;
         int blockI = 0;
@@ -106,7 +110,7 @@ public class Chunk : ObjectBehavior
                     Int3 localBlockPosition = new(x, y, z);
                     BaseBlock blockType = BlockTypeManager.GetBlockType(block.block_id);
 
-                    blockType.GenerateMesh(ref elementIndex, LocalPositionToWorld(localBlockPosition), localBlockPosition, ref GenerateMesh_vertices, ref GenerateMesh_faces, ref GenerateMesh_textureCoords);
+                    blockType.GenerateMesh(ref elementIndex, LocalPositionToWorld(localBlockPosition), localBlockPosition, ref GenerateMesh_vertices, ref GenerateMesh_faces, ref GenerateMesh_textureCoords, ref GenerateMesh_textureIdIndices, ref GenerateMesh_occlusionLevels);
                 }
             }
         }
@@ -134,10 +138,12 @@ public class Chunk : ObjectBehavior
         }
 
         _connectedMesh.DeleteMesh();
-        _connectedMesh.LoadRawData(GenerateMesh_vertices.ToArray(), GenerateMesh_faces.ToArray(), GenerateMesh_normals.ToArray(), GenerateMesh_textureCoords.ToArray());
+        _connectedMesh.LoadRawData(GenerateMesh_vertices.ToArray(), GenerateMesh_faces.ToArray(), GenerateMesh_normals.ToArray(), GenerateMesh_textureCoords.ToArray(), GenerateMesh_textureIdIndices.ToArray(), GenerateMesh_occlusionLevels.ToArray());
         GenerateMesh_vertices = new();
         GenerateMesh_faces = new();
         GenerateMesh_textureCoords = new();
+        GenerateMesh_textureIdIndices = new();
+        GenerateMesh_occlusionLevels = new();
 
         newMeshGenerated = false;
         currentJobID = -1;

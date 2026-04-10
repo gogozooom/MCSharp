@@ -1,4 +1,5 @@
 ﻿Known Issues:
+	- Stars not rendering
 	- Selection Outline clipping issues near corners and back of block
 		* Solution: Probably something to do with the blend flags origonally in minecraft
 	- Chunks not updating when under a lot of stress
@@ -9,8 +10,6 @@
 		* Solution: Create input buffer handled 
 	
 TODO:
-
-	- Rework FaceInfo being a struct now
 
 	- Add perspective toggle
 	- Add player model

@@ -59,12 +59,12 @@ public abstract class BaseBlock
     /// <summary>
     /// This is to only be used by <see cref="Chunk"/>.cs
     /// </summary>
-    public abstract void GenerateMesh(ref int elementIndex, Int3 worldBlockPosition, Int3 localBlockPosition, ref List<Float3> GenerateMesh_vertices, ref List<ChunkFaceInfo> GenerateMesh_faces, ref List<Float2> GenerateMesh_textureCoords);
+    public abstract void GenerateMesh(ref int elementIndex, Int3 worldBlockPosition, Int3 localBlockPosition, ref List<Float3> GenerateMesh_vertices, ref List<MeshFace> GenerateMesh_faces, ref List<Float2> GenerateMesh_textureCoords, ref List<int> GenerateMesh_textureIdIndices, ref List<Float4> GenerateMesh_occlusionLevels);
 
     /// <summary>
     /// Only to be used by <see cref="GenerateMesh"/>
     /// </summary>
-    protected static void GM_GenerateBlockMesh(BaseBlock blockType, Int3 worldBlockPosition, Int3 localBlockPosition, ref List<Float3> vertices, ref List<ChunkFaceInfo> faces, ref List<Float2> textureCoords, ref int elementIndex, BlockModelElement element)
+    protected static void GM_GenerateBlockMesh(BaseBlock blockType, Int3 worldBlockPosition, Int3 localBlockPosition, ref List<Float3> vertices, ref List<MeshFace> faces, ref List<Float2> textureCoords, ref List<int> GenerateMesh_textureIdIndices, ref List<Float4> GenerateMesh_occlusionLevels, ref int elementIndex, BlockModelElement element)
     {
         if (!element.HasFaceData)
         {
@@ -304,75 +304,51 @@ public abstract class BaseBlock
 
         if (renderWestFace)
         {
-            GM_GenerateModelFace(element.west.rotation, element.west.uv, westTextureID, [1, 2, 3, 4], 1,
-                ref textureCoords, ref squareFaces, ref elementIndex,
+            GM_GenerateModelFace(ref textureCoords, ref squareFaces, ref elementIndex, 
+                element.west.rotation, element.west.uv, westTextureID, [1, 2, 3, 4], 1,
                 0.6f, shadeNorthWestUp, shadeSouthWestUp, shadeNorthWestDown, shadeSouthWestDown, shadeWestUp, shadeWestDown, shadeNorthWest, shadeSouthWest, shadeWest);
         }
 
         if (renderEastFace)
         {
-            GM_GenerateModelFace(element.east.rotation, element.east.uv, eastTextureID, [8, 5, 6, 7], 2,
-                ref textureCoords, ref squareFaces, ref elementIndex,
+            GM_GenerateModelFace(ref textureCoords, ref squareFaces, ref elementIndex, 
+                element.east.rotation, element.east.uv, eastTextureID, [8, 5, 6, 7], 2,
                 0.6f, shadeSouthEastUp, shadeNorthEastUp, shadeSouthEastDown, shadeNorthEastDown, shadeEastUp, shadeEastDown, shadeSouthEast, shadeNorthEast, shadeEast);
         }
 
         if (renderDownFace)
         {
-            GM_GenerateModelFace(element.down.rotation, element.down.uv, downTextureID, [1, 5, 8, 2], 3,
-                ref textureCoords, ref squareFaces, ref elementIndex,
+            GM_GenerateModelFace(ref textureCoords, ref squareFaces, ref elementIndex, 
+                element.down.rotation, element.down.uv, downTextureID, [1, 5, 8, 2], 3,
                 0.5f, shadeSouthWestDown, shadeSouthEastDown, shadeNorthWestDown, shadeNorthEastDown, shadeSouthDown, shadeNorthDown, shadeWestDown, shadeEastDown, shadeDown);
         }
 
         if (renderUpFace)
         {
-            GM_GenerateModelFace(element.up.rotation, element.up.uv, upTextureID, [3, 7, 6, 4], 4,
-                ref textureCoords, ref squareFaces, ref elementIndex,
+            GM_GenerateModelFace(ref textureCoords, ref squareFaces, ref elementIndex,
+                element.up.rotation, element.up.uv, upTextureID, [3, 7, 6, 4], 4,
                 1, shadeNorthWestUp, shadeNorthEastUp, shadeSouthWestUp, shadeSouthEastUp, shadeNorthUp, shadeSouthUp, shadeWestUp, shadeEastUp, shadeUp);
         }
 
         if (renderNorthFace)
         {
-            GM_GenerateModelFace(element.north.rotation, element.north.uv, northTextureID, [5, 1, 4, 6], 5,
-                ref textureCoords, ref squareFaces, ref elementIndex,
+            GM_GenerateModelFace(ref textureCoords, ref squareFaces, ref elementIndex,
+                element.north.rotation, element.north.uv, northTextureID, [5, 1, 4, 6], 5,
                 0.8f, shadeNorthEastUp, shadeNorthWestUp, shadeNorthEastDown, shadeNorthWestDown, shadeNorthUp, shadeNorthDown, shadeNorthEast, shadeNorthWest, shadeNorth);
         }
 
         if (renderSouthFace)
         {
-            GM_GenerateModelFace(element.south.rotation, element.south.uv, southTextureID, [2, 8, 7, 3], 6,
-                ref textureCoords, ref squareFaces, ref elementIndex,
+            GM_GenerateModelFace(ref textureCoords, ref squareFaces, ref elementIndex,
+                element.south.rotation, element.south.uv, southTextureID, [2, 8, 7, 3], 6,
                 0.8f, shadeSouthWestUp, shadeSouthEastUp, shadeSouthWestDown, shadeSouthEastDown, shadeSouthUp, shadeSouthDown, shadeSouthWest, shadeSouthEast, shadeSouth);
         }
 
         foreach (var (data, textureId, occlusionLevels) in squareFaces)
         {
-            // What the heck is flip?
-            // Well... Because of how I defined face data,
-            // If I want to get the four corners of a triangulated mesh face,
-            // I'll have to work on one triangle at a time.
-            // So this is my weird and TMP solution (TODO: actually rewrite triangulation behavior to be caluclated later
-
-            bool flip = false;
-
-            foreach (var faceItem in ChunkFaceInfo.GetTriangulatedFaces(data))
-            {
-                faceItem.texture_id = textureId;
-
-                if (!flip)
-                {
-                    faceItem.occlusionLevel = [occlusionLevels.x, occlusionLevels.y, occlusionLevels.z];
-
-                    flip = true;
-                }
-                else
-                {
-                    faceItem.occlusionLevel = [occlusionLevels.x, occlusionLevels.z, occlusionLevels.w];
-
-                    flip = false;
-                }
-
-                faces.Add(faceItem);
-            }
+            faces.Add(new MeshFace(data));
+            GenerateMesh_textureIdIndices.Add(textureId);
+            GenerateMesh_occlusionLevels.Add(occlusionLevels);
         }
         elementIndex++;
     }
@@ -431,8 +407,8 @@ public abstract class BaseBlock
     /// <summary>
     /// Only to be used by <see cref="GenerateMesh"/>
     /// </summary>
-    protected static void GM_GenerateModelFace(float uvRotation, UVRect uvs, int textureID, int[] vertIndices, int normalIndex,
-        ref List<Float2> textureCoords, ref List<(string, int, Float4)> squareFaces, ref int elementIndex,
+    protected static void GM_GenerateModelFace(ref List<Float2> textureCoords, ref List<(string, int, Float4)> squareFaces, ref int elementIndex, 
+        float uvRotation, UVRect uvs, int textureID, int[] vertIndices, int normalIndex,
         float baseShadeLevel, bool shadeTopLeft, bool shadeTopRight, bool shadeBottomLeft, bool shadeBottomRight, bool shadeTop, bool shadeBottom, bool shadeLeft, bool shadeRight, bool shadeFace)
     {
         switch (uvRotation)

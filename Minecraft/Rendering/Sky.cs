@@ -60,7 +60,7 @@ public class Sky : ObjectBehavior
 
         Mesh sunMesh = new Mesh();
         var sunMeshGenerated = BuildPlane(30, 100);
-        sunMesh.LoadRawData(sunMeshGenerated.vertices, sunMeshGenerated.faces, sunMeshGenerated.normals, sunMeshGenerated.textureCoords);
+        sunMesh.LoadRawData(sunMeshGenerated.vertices, [sunMeshGenerated.face], sunMeshGenerated.normals, sunMeshGenerated.textureCoords);
 
         sun.AddComponent<MeshFilter>().mesh = sunMesh;
         sun.AddComponent<MeshRenderer>().material = new Material(texture: new Texture2D(TextureManager.GetPathToTexture("environment\\sun.png"), "sun", TextureSampleType.Nearest), blendMode: BlendMode.Blend, useDepth: false, transformMode: RenderTranformMode.LocalTransform, renderOrder: -3);
@@ -72,7 +72,7 @@ public class Sky : ObjectBehavior
 
         Mesh moonMesh = new Mesh();
         var moonMeshGenerated = BuildPlane(20, 100, true);
-        moonMesh.LoadRawData(moonMeshGenerated.vertices, moonMeshGenerated.faces, moonMeshGenerated.normals, moonMeshGenerated.textureCoords);
+        moonMesh.LoadRawData(moonMeshGenerated.vertices, [moonMeshGenerated.face], moonMeshGenerated.normals, moonMeshGenerated.textureCoords);
 
         moon.AddComponent<MeshFilter>().mesh = moonMesh;
         moonRenderer = moon.AddComponent<MeshRenderer>();
@@ -152,7 +152,7 @@ public class Sky : ObjectBehavior
     }
 
     // Minecraft Functions!!!
-    private (Float3[] verticies, FaceInfo[] faces) BuildStars()
+    private (Float3[] verticies, MeshFace[] faces) BuildStars()
     {
         List<Float3> verticies = new();
 
@@ -183,19 +183,16 @@ public class Sky : ObjectBehavior
             }
         }
 
-        List<FaceInfo> faces = new();
+        List<MeshFace> faces = new();
 
         for (int i = 0; i < verticies.Count; i += 4)
         {
-            foreach (var face in FaceInfo.GetTriangulatedFaces($"f {i + 1} {i + 2} {i + 3} {i + 4}"))
-            {
-                faces.Add(face);
-            }
+            faces.Add(new MeshFace($"f {i + 1} {i + 2} {i + 3} {i + 4}"));
         }
 
         return (verticies.ToArray(), faces.ToArray());
     }
-    private (Float3[] vertices, FaceInfo[] faces, Float3[] normals, Float2[] textureCoords) BuildPlane(float width, float distance, bool flipTextureCoords = false)
+    private (Float3[] vertices, MeshFace face, Float3[] normals, Float2[] textureCoords) BuildPlane(float width, float distance, bool flipTextureCoords = false)
     {
         Float3[] vertices =
             [
@@ -216,11 +213,9 @@ public class Sky : ObjectBehavior
                 new Float3(0, -1, 0),
             ];
 
-        string faceInfo = flipTextureCoords ? "f 1/4/1 2/3/1 3/2/1 4/1/1" : "f 1/1/1 2/2/1 3/3/1 4/4/1";
+        MeshFace face = new (flipTextureCoords ? "f 1/4/1 2/3/1 3/2/1 4/1/1" : "f 1/1/1 2/2/1 3/3/1 4/4/1");
 
-        FaceInfo[] faces = FaceInfo.GetTriangulatedFaces(faceInfo);
-
-        return (vertices, faces, normals, textureCoords);
+        return (vertices, face, normals, textureCoords);
     }
     private Float3[] BuildSkyDisc(float height)
     {
