@@ -16,9 +16,6 @@
     <Reference Include="BoboEngine">
       <HintPath>..\BoboEngine\bin\Debug\net8.0\BoboEngine.dll</HintPath>
     </Reference>
-    <Reference Include="LCVR">
-      <HintPath>..\..\AppData\Roaming\r2modmanPlus-local\LethalCompany\profiles\HideAndSeek\BepInEx\plugins\DaXcess-LethalCompanyVR\LCVR\LCVR.dll</HintPath>
-    </Reference>
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
