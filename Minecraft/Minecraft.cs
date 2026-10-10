@@ -1,4 +1,5 @@
 ﻿using BoboEngine;
+using BoboEngine.Utils;
 using ConsoleCommand;
 using Minecraft.Entites;
 using Minecraft.UI;
@@ -20,12 +21,50 @@ public static class Minecraft
     [OnEngineInitialize]
     public static void Initialize()
     {
+        if (!VerifyMCDataVersion()) return;
+
         TextureManager.GenerateAtlas();
         BlockTypeManager.GenerateBlockData();
 
         Engine.Log("Minecraft Initialized!");
 
         SceneManager.sceneLoaded += OnSceneLoad;
+    }
+
+    const string WorkingVersion = "1.21.10";
+    static bool VerifyMCDataVersion()
+    {
+        if (!Directory.Exists("Data"))
+        {
+            Engine.LogError($"Could not find Minecraft Data! Please extract version {WorkingVersion} data in folder named \"Data\" next to the executable!");
+            return false;
+        }
+
+        if (!File.Exists("Data\\version.json"))
+        {
+            Engine.LogError("Could not find version.json in Data folder!");
+            return false;
+        }
+        
+        var json = FileParser.ParseJson("Version", File.ReadAllText("Data\\version.json"));
+        var id = json.GetItem("id");
+
+        if (id == null)
+        {
+            Engine.LogError("Could not id property in version.json!");
+            return false;
+        }
+
+        var idS = id.GetValue<String>();
+
+        Engine.Log($"Minecraft Version: {idS}");
+
+        if (idS != WorkingVersion)
+        {
+            Engine.LogWarning($"Only Minecraft version {WorkingVersion} is tested to work!");
+        }
+
+        return true;
     }
 
     public static void OnSceneLoad()
