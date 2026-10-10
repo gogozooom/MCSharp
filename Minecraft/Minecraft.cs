@@ -20,8 +20,6 @@ public static class Minecraft
     [OnEngineInitialize]
     public static void Initialize()
     {
-        BaseVectors.FacingTowards(Float3.zAxis, Float3.yAxis);
-
         TextureManager.GenerateAtlas();
         BlockTypeManager.GenerateBlockData();
 
