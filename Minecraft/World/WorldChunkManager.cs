@@ -97,7 +97,7 @@ public static class WorldChunkManager
         });
     }
 
-    public static void GenerateTestChunk()
+    public static void GenerateTestChunks()
     {
         if (meshMaterial == null)
         {

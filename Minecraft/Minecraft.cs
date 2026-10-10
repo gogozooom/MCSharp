@@ -30,7 +30,7 @@ public static class Minecraft
 
     public static void OnSceneLoad()
     {
-        WorldChunkManager.GenerateTestChunk();
+        WorldChunkManager.GenerateTestChunks();
         SceneManager.currentScene.skybox.gameObject.AddComponent<Sky>();
         new GameObject("UIManager").AddComponent<UIManager>();
         new GameObject("Player").AddComponent<Player>();
