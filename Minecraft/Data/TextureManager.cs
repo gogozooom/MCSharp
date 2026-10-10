@@ -29,7 +29,7 @@ public static class TextureManager
             {
                 var fileName = file.Remove(0, texturesPath.Length + 1).Split('.')[0].Replace('\\', '/');
 
-                if (IgnoreFile(file.Remove(0, texturesPath.Length + 1)))
+                if (ShouldIgnoreFile(file.Remove(0, texturesPath.Length + 1)))
                 {
                     Engine.Log($"Ignoring '{fileName}'...");
                     continue;
@@ -65,7 +65,7 @@ public static class TextureManager
         blockTextureArray = new Texture2DArray(images.ToArray(), "atlas", TextureSampleType.Nearest);
     }
 
-    public static bool IgnoreFile(string file)
+    public static bool ShouldIgnoreFile(string file)
     {
         return !file.StartsWith("block");
     }
@@ -129,6 +129,5 @@ public static class TextureManager
         Engine.LogMessage($"Created file at: '{Path.GetFullPath(outputPath)}'");
 
         writer.Close();
-        //Process.Start("explorer.exe", '"'+outputPath+'"');
     }
 }
