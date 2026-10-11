@@ -88,8 +88,9 @@ public class Sky : ObjectBehavior
         var starsMeshGenerated = BuildStars();
         starsMesh.LoadRawData(starsMeshGenerated.verticies, starsMeshGenerated.faces);
 
+        stars.AddComponent<MeshFilter>().mesh = starsMesh;
         starsRenderer = stars.AddComponent<MeshRenderer>();
-        starsRenderer.material = new Material("Stars", blendMode: BlendMode.Blend, useDepth:false, transformMode: RenderTranformMode.LocalTransform, renderOrder: -1);
+        starsRenderer.material = new Material("Stars", blendMode: BlendMode.Normal, useDepth:false, transformMode: RenderTranformMode.LocalTransform, renderOrder: -1);
 
         // Load Biome Colors
 
