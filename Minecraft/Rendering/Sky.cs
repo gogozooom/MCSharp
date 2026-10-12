@@ -121,7 +121,7 @@ public class Sky : ObjectBehavior
 
             var sColorD = attributesD.GetItem("minecraft:visual/sky_color");
 
-            if (sColorD) sky_Color = SplitInt(sColorD.GetValue<int>());
+            if (sColorD) sky_Color = (Float3)FromHEX(sColorD.GetValue());
         }
     }
 
@@ -246,6 +246,19 @@ public class Sky : ObjectBehavior
         return vertices.ToArray();
     }
 
+    private static Float4 FromHEX(string hex)
+    {
+        var result = new Float4();
+
+        if (hex.ToCharArray()[0] == '#') hex = hex.Remove(0, 1);
+
+        if (hex.Length >= 2) result.r = Convert.ToUInt16(hex.Substring(0, 2), 16) / 255f;
+        if (hex.Length >= 4) result.g = Convert.ToUInt16(hex.Substring(2, 2), 16) / 255f;
+        if (hex.Length >= 6) result.b = Convert.ToUInt16(hex.Substring(4, 2), 16) / 255f;
+        if (hex.Length >= 8) result.a = Convert.ToUInt16(hex.Substring(6, 2), 16) / 255f;
+
+        return result;
+    }
     private static Float3 SplitInt(int input)
     {
         string binary = Convert.ToString(input, 2);
