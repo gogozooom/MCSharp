@@ -165,6 +165,54 @@ public class Sky : ObjectBehavior
         SetMoonPhase(Maths.Mod(TimeOfDay.time / 24000, 8));
     }
 
+
+    private static Float4 FromHEX(string hex)
+    {
+        var result = new Float4();
+
+        if (hex.ToCharArray()[0] == '#') hex = hex.Remove(0, 1);
+
+        if (hex.Length >= 2) result.r = Convert.ToUInt16(hex.Substring(0, 2), 16) / 255f;
+        if (hex.Length >= 4) result.g = Convert.ToUInt16(hex.Substring(2, 2), 16) / 255f;
+        if (hex.Length >= 6) result.b = Convert.ToUInt16(hex.Substring(4, 2), 16) / 255f;
+        if (hex.Length >= 8) result.a = Convert.ToUInt16(hex.Substring(6, 2), 16) / 255f;
+
+        return result;
+    }
+    private static Float3 SplitInt(int input)
+    {
+        string binary = Convert.ToString(input, 2);
+        binary = binary.PadLeft(24, '0');
+
+        string binaryR = "";
+        string binaryG = "";
+        string binaryB = "";
+
+        int i = 0;
+        foreach (var c in binary.ToCharArray())
+        {
+            if (i < 8)
+            {
+                binaryR += c;
+            }
+            else if (i < 16)
+            {
+                binaryG += c;
+            }
+            else
+            {
+                binaryB += c;
+            }
+            i++;
+        }
+
+        float r = Convert.ToInt32(binaryR, 2) / 255f;
+        float g = Convert.ToInt32(binaryG, 2) / 255f;
+        float b = Convert.ToInt32(binaryB, 2) / 255f;
+
+        return new(r, g, b);
+    }
+
     // Minecraft Functions!!!
     private (Float3[] verticies, MeshFace[] faces) BuildStars()
     {
@@ -244,53 +292,6 @@ public class Sky : ObjectBehavior
         }
 
         return vertices.ToArray();
-    }
-
-    private static Float4 FromHEX(string hex)
-    {
-        var result = new Float4();
-
-        if (hex.ToCharArray()[0] == '#') hex = hex.Remove(0, 1);
-
-        if (hex.Length >= 2) result.r = Convert.ToUInt16(hex.Substring(0, 2), 16) / 255f;
-        if (hex.Length >= 4) result.g = Convert.ToUInt16(hex.Substring(2, 2), 16) / 255f;
-        if (hex.Length >= 6) result.b = Convert.ToUInt16(hex.Substring(4, 2), 16) / 255f;
-        if (hex.Length >= 8) result.a = Convert.ToUInt16(hex.Substring(6, 2), 16) / 255f;
-
-        return result;
-    }
-    private static Float3 SplitInt(int input)
-    {
-        string binary = Convert.ToString(input, 2);
-        binary = binary.PadLeft(24, '0');
-
-        string binaryR = "";
-        string binaryG = "";
-        string binaryB = "";
-
-        int i = 0;
-        foreach (var c in binary.ToCharArray())
-        {
-            if (i < 8)
-            {
-                binaryR += c;
-            }
-            else if(i < 16)
-            {
-                binaryG += c;
-            }
-            else
-            {
-                binaryB += c;
-            }
-            i++;
-        }
-
-        float r = Convert.ToInt32(binaryR, 2) / 255f;
-        float g = Convert.ToInt32(binaryG, 2) / 255f;
-        float b = Convert.ToInt32(binaryB, 2) / 255f;
-
-        return new(r,g,b);
     }
 
     public void GenerateSunriseset(float transparency)
