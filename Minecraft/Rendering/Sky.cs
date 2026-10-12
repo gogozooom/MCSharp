@@ -2,6 +2,7 @@
 using BoboEngine.Shaders;
 using BoboEngine.Utils;
 using Minecraft.Random;
+using StbImageSharp;
 namespace Minecraft;
 
 public class Sky : ObjectBehavior
@@ -110,15 +111,15 @@ public class Sky : ObjectBehavior
 
         var data = FileParser.ParseJson("plains", File.ReadAllText(file));
 
-        var effectsD = data.GetItem("effects");
+        var attributesD = data.GetItem("attributes");
 
-        if (effectsD)
+        if (attributesD)
         {
-            var fColorD = effectsD.GetItem("fog_color");
+            //var fColorD = attributesD.GetItem("fog_color");
 
-            if (fColorD) fog_Color = SplitInt(fColorD.GetValue<int>());
+            //if (fColorD) fog_Color = SplitInt(fColorD.GetValue<int>());
 
-            var sColorD = effectsD.GetItem("sky_color");
+            var sColorD = attributesD.GetItem("minecraft:visual/sky_color");
 
             if (sColorD) sky_Color = SplitInt(sColorD.GetValue<int>());
         }
@@ -245,7 +246,7 @@ public class Sky : ObjectBehavior
         return vertices.ToArray();
     }
 
-    private Float3 SplitInt(int input)
+    private static Float3 SplitInt(int input)
     {
         string binary = Convert.ToString(input, 2);
         binary = binary.PadLeft(24, '0');
@@ -301,12 +302,12 @@ public class Sky : ObjectBehavior
         sunRiseSetMesh.DeleteMesh();
         sunRiseSetMesh.LoadRawData(vertices.ToArray(), colors.ToArray());
     }
-    public bool IsSunriseOrSunset(float angleFromY)
+    public static bool IsSunriseOrSunset(float angleFromY)
     {
         float f = Maths.Cos(angleFromY);
         return f >= -0.4F && f <= 0.4F;
     }
-    public Float4 GetSunrisesetColor(float angleFromY)
+    public static Float4 GetSunrisesetColor(float angleFromY)
     {
         float angle = Maths.Cos(angleFromY);
 
@@ -319,7 +320,7 @@ public class Sky : ObjectBehavior
     }
     public Float3 ComputeFogColor(float angleFromY, int renderDistance)//, float darkenAmount)
     {
-        float blend = 0.25F + 0.75F * (float)renderDistance / 32.0F;
+        float blend = 0.25F + 0.75F * renderDistance / 32.0F;
         blend = 1.0F - (float)Math.Pow((double)blend, 0.25);
 
         float brightness = Maths.Clamp(Maths.Cos(angleFromY), 0.0F, 1.0F);
