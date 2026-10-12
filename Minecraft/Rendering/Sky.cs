@@ -58,12 +58,12 @@ public class Sky : ObjectBehavior
         sun = new GameObject("Sun");
         sun.transform.parent = transform;
 
-        Mesh sunMesh = new Mesh();
+        Mesh sunMesh = new();
         var sunMeshGenerated = BuildPlane(30, 100);
         sunMesh.LoadRawData(sunMeshGenerated.vertices, [sunMeshGenerated.face], sunMeshGenerated.normals, sunMeshGenerated.textureCoords);
 
         sun.AddComponent<MeshFilter>().mesh = sunMesh;
-        sun.AddComponent<MeshRenderer>().material = new Material(texture: new Texture2D(TextureManager.GetPathToTexture("environment\\sun.png"), "sun", TextureSampleType.Nearest), blendMode: BlendMode.Blend, useDepth: false, transformMode: RenderTranformMode.LocalTransform, renderOrder: -3);
+        sun.AddComponent<MeshRenderer>().material = new Material(texture: new Texture2D(TextureManager.GetPathToTexture("environment\\celestial\\sun.png"), "sun", TextureSampleType.Nearest), blendMode: BlendMode.Blend, useDepth: false, transformMode: RenderTranformMode.LocalTransform, renderOrder: -3);
 
         // Moon
 
@@ -76,7 +76,19 @@ public class Sky : ObjectBehavior
 
         moon.AddComponent<MeshFilter>().mesh = moonMesh;
         moonRenderer = moon.AddComponent<MeshRenderer>();
-        moonRenderer.material = new Material("Moon", texture: new Texture2DArray(TextureManager.GetPathToTexture("environment\\moon_phases.png"), "moon", 32, 32, TextureSampleType.Nearest), blendMode: BlendMode.Blend, useDepth: false, transformMode: RenderTranformMode.LocalTransform, renderOrder: -2);
+
+        var moonPhasesTextures = new ImageResult[] {
+                Texture.ReadImageFile(TextureManager.GetPathToTexture("environment\\celestial\\moon\\full_moon.png"), ColorComponents.RedGreenBlueAlpha),
+                Texture.ReadImageFile(TextureManager.GetPathToTexture("environment\\celestial\\moon\\waning_gibbous.png"), ColorComponents.RedGreenBlueAlpha),
+                Texture.ReadImageFile(TextureManager.GetPathToTexture("environment\\celestial\\moon\\third_quarter.png"), ColorComponents.RedGreenBlueAlpha),
+                Texture.ReadImageFile(TextureManager.GetPathToTexture("environment\\celestial\\moon\\waning_crescent.png"), ColorComponents.RedGreenBlueAlpha),
+                Texture.ReadImageFile(TextureManager.GetPathToTexture("environment\\celestial\\moon\\new_moon.png"), ColorComponents.RedGreenBlueAlpha),
+                Texture.ReadImageFile(TextureManager.GetPathToTexture("environment\\celestial\\moon\\waxing_crescent.png"), ColorComponents.RedGreenBlueAlpha),
+                Texture.ReadImageFile(TextureManager.GetPathToTexture("environment\\celestial\\moon\\first_quarter.png"), ColorComponents.RedGreenBlueAlpha),
+                Texture.ReadImageFile(TextureManager.GetPathToTexture("environment\\celestial\\moon\\waxing_gibbous.png"), ColorComponents.RedGreenBlueAlpha)
+        };
+
+        moonRenderer.material = new Material("Moon", texture: new Texture2DArray(moonPhasesTextures, "moon", TextureSampleType.Nearest), blendMode: BlendMode.Blend, useDepth: false, transformMode: RenderTranformMode.LocalTransform, renderOrder: -2);
         moonRenderer.material.SetFloat("phase", 0);
 
         // Stars
