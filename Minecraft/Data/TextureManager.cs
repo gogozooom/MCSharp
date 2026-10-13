@@ -31,7 +31,7 @@ public static class TextureManager
 
                 if (ShouldIgnoreFile(file.Remove(0, texturesPath.Length + 1)))
                 {
-                    Engine.Log($"Ignoring '{fileName}'...");
+                    //Engine.Log($"Ignoring '{fileName}'...");
                     continue;
                 }
 
@@ -40,6 +40,12 @@ public static class TextureManager
                 var type = Path.GetExtension(file);
 
                 var image = Texture.ReadImageFile(file, ColorComponents.RedGreenBlueAlpha);
+
+                if (image.Width > 16 || image.Height > 16) // TMP: Texture becoming too large
+                {
+                    Engine.Log($"Ignoring '{fileName}' as it's unsupported");
+                    continue;
+                }
 
                 images.Add(image);
 
@@ -58,7 +64,7 @@ public static class TextureManager
                     i++;
                 }
 
-                Engine.LogMessage($"Loaded ({images.Count}/{t}) --- '{fileName}{type}'");
+                //Engine.LogMessage($"Loaded ({images.Count}/{t}) --- '{fileName}{type}'");
             }
         }
 
@@ -72,6 +78,11 @@ public static class TextureManager
 
     public static int GetTextureID(string textureName)
     {
+        if (textureName == null)
+        {
+            Engine.LogError("TextureAtlasManager: Requested texture name of null");
+            return 0;
+        }
         if (!textureName.Contains(':')) textureName = "minecraft:" + textureName;
         if (textureName.Contains('#')) return 0;
 

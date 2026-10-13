@@ -36,20 +36,20 @@ public class BlockModelElement
     public readonly Float3 from;
     public readonly Float3 to;
 
-    public readonly BlockModelRotation rotation;
+    public readonly BlockModelRotation? rotation;
 
     public readonly bool shade;
 
-    public readonly BlockModelFace down;
-    public readonly BlockModelFace up;
-    public readonly BlockModelFace north;
-    public readonly BlockModelFace south;
-    public readonly BlockModelFace west;
-    public readonly BlockModelFace east;
+    public readonly BlockModelFace? down;
+    public readonly BlockModelFace? up;
+    public readonly BlockModelFace? north;
+    public readonly BlockModelFace? south;
+    public readonly BlockModelFace? west;
+    public readonly BlockModelFace? east;
 
     public readonly bool HasFaceData;
 
-    public BlockModelElement(Float3 from, Float3 to, BlockModelRotation rotation, bool shade, BlockModelFace down, BlockModelFace up, BlockModelFace north, BlockModelFace south, BlockModelFace west, BlockModelFace east)
+    public BlockModelElement(Float3 from, Float3 to, BlockModelRotation? rotation, bool shade, BlockModelFace? down, BlockModelFace? up, BlockModelFace? north, BlockModelFace? south, BlockModelFace? west, BlockModelFace? east)
     {
         this.from = from;
         this.to = to;
@@ -65,7 +65,7 @@ public class BlockModelElement
         this.west = west;
         this.east = east;
 
-        HasFaceData = down || up || north || south || west || east;
+        HasFaceData = down != null || up != null || north != null || south != null || west != null || east != null;
     }
 
     public static BlockModelElement LoadFromJson(DynamicData elementData)
@@ -73,17 +73,16 @@ public class BlockModelElement
         Float3 from = Float3.zero;
         Float3 to = Float3.zero;
 
-        BlockModelRotation rotation;
+        BlockModelRotation? rotation;
 
         bool shade = true;
 
-        BlockModelFace down = null;
-        BlockModelFace up = null;
-        BlockModelFace north = null;
-        BlockModelFace south = null;
-        BlockModelFace west = null;
-        BlockModelFace east = null;
-
+        BlockModelFace? down = null;
+        BlockModelFace? up = null;
+        BlockModelFace? north = null;
+        BlockModelFace? south = null;
+        BlockModelFace? west = null;
+        BlockModelFace? east = null;
 
         var fromD = elementData.GetItem("from");
         if (fromD) from = fromD.GetValue<Float3>() / 16;
@@ -111,8 +110,8 @@ public class BlockModelElement
         return new(from, to, rotation, shade, down, up, north, south, west, east);
     }
 
-    Float3[] _cachedVerts;
-    public Float3[] GetCachedVerticies()
+    Float3[]? _cachedVerts;
+    public Float3[]? GetCachedVerticies()
     {
         return _cachedVerts;
     }
@@ -136,7 +135,7 @@ public class BlockModelRotation
         this.rescale = rescale;
     }
 
-    public static BlockModelRotation LoadFromJson(DynamicData rotationData)
+    public static BlockModelRotation? LoadFromJson(DynamicData rotationData)
     {
         if (rotationData == null) return null;
 
@@ -170,11 +169,11 @@ public class BlockModelRotation
 public class BlockModelFace
 {
     public readonly UVRect uv;
-    public readonly string texture;
+    public readonly string? texture;
     public readonly float rotation;
-    public readonly string cullface;
+    public readonly string? cullface;
 
-    public BlockModelFace(UVRect uv, string texture, float rotation, string cullface)
+    public BlockModelFace(UVRect uv, string? texture, float rotation, string? cullface)
     {
         this.uv = uv;
         this.texture = texture;
@@ -182,14 +181,14 @@ public class BlockModelFace
         this.cullface = cullface;
     }
 
-    public static BlockModelFace LoadFromJson(DynamicData faceData, Float3 from, Float3 to)
+    public static BlockModelFace? LoadFromJson(DynamicData faceData, Float3 from, Float3 to)
     {
         if (faceData == null) return null;
 
         UVRect uv;
-        string texture = null;
+        string? texture = null;
         float rotation = 0;
-        string cullface = null;
+        string? cullface = null;
 
         var uvD = faceData.GetItem("uv");
         if (uvD)
@@ -250,7 +249,19 @@ public class BlockModelFace
         uv = uv.FlipV();
 
         var textureD = faceData.GetItem("texture");
-        if (textureD) texture = textureD.GetValue<string>();
+        if (textureD)
+        {
+            if (textureD.GetDataType() == DataType.Value)
+            {
+                texture = textureD.GetValue();
+            }
+            else
+            {
+                var spriteD = textureD.GetItem("sprite");
+                if (spriteD) texture = spriteD.GetValue();
+            }
+        }
+
 
         var rotateD = faceData.GetItem("rotation");
         if (rotateD)
@@ -268,7 +279,7 @@ public class BlockModelFace
         }
 
         var cullfaceD = faceData.GetItem("cullface");
-        if (cullfaceD) cullface = cullfaceD.GetValue<string>();
+        if (cullfaceD) cullface = cullfaceD.GetValue();
 
         return new(uv, texture, rotation, cullface);
     }

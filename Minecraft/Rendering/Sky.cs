@@ -2,6 +2,7 @@
 using BoboEngine.Shaders;
 using BoboEngine.Utils;
 using Minecraft.Random;
+using StbImageSharp;
 namespace Minecraft;
 
 public class Sky : ObjectBehavior
@@ -58,12 +59,12 @@ public class Sky : ObjectBehavior
         sun = new GameObject("Sun");
         sun.transform.parent = transform;
 
-        Mesh sunMesh = new Mesh();
+        Mesh sunMesh = new();
         var sunMeshGenerated = BuildPlane(30, 100);
         sunMesh.LoadRawData(sunMeshGenerated.vertices, [sunMeshGenerated.face], sunMeshGenerated.normals, sunMeshGenerated.textureCoords);
 
         sun.AddComponent<MeshFilter>().mesh = sunMesh;
-        sun.AddComponent<MeshRenderer>().material = new Material(texture: new Texture2D(TextureManager.GetPathToTexture("environment\\sun.png"), "sun", TextureSampleType.Nearest), blendMode: BlendMode.Blend, useDepth: false, transformMode: RenderTranformMode.LocalTransform, renderOrder: -3);
+        sun.AddComponent<MeshRenderer>().material = new Material(texture: new Texture2D(TextureManager.GetPathToTexture("environment\\celestial\\sun.png"), "sun", TextureSampleType.Nearest), blendMode: BlendMode.Blend, useDepth: false, transformMode: RenderTranformMode.LocalTransform, renderOrder: -3);
 
         // Moon
 
@@ -76,7 +77,19 @@ public class Sky : ObjectBehavior
 
         moon.AddComponent<MeshFilter>().mesh = moonMesh;
         moonRenderer = moon.AddComponent<MeshRenderer>();
-        moonRenderer.material = new Material("Moon", texture: new Texture2DArray(TextureManager.GetPathToTexture("environment\\moon_phases.png"), "moon", 32, 32, TextureSampleType.Nearest), blendMode: BlendMode.Blend, useDepth: false, transformMode: RenderTranformMode.LocalTransform, renderOrder: -2);
+
+        var moonPhasesTextures = new ImageResult[] {
+                Texture.ReadImageFile(TextureManager.GetPathToTexture("environment\\celestial\\moon\\full_moon.png"), ColorComponents.RedGreenBlueAlpha),
+                Texture.ReadImageFile(TextureManager.GetPathToTexture("environment\\celestial\\moon\\waning_gibbous.png"), ColorComponents.RedGreenBlueAlpha),
+                Texture.ReadImageFile(TextureManager.GetPathToTexture("environment\\celestial\\moon\\third_quarter.png"), ColorComponents.RedGreenBlueAlpha),
+                Texture.ReadImageFile(TextureManager.GetPathToTexture("environment\\celestial\\moon\\waning_crescent.png"), ColorComponents.RedGreenBlueAlpha),
+                Texture.ReadImageFile(TextureManager.GetPathToTexture("environment\\celestial\\moon\\new_moon.png"), ColorComponents.RedGreenBlueAlpha),
+                Texture.ReadImageFile(TextureManager.GetPathToTexture("environment\\celestial\\moon\\waxing_crescent.png"), ColorComponents.RedGreenBlueAlpha),
+                Texture.ReadImageFile(TextureManager.GetPathToTexture("environment\\celestial\\moon\\first_quarter.png"), ColorComponents.RedGreenBlueAlpha),
+                Texture.ReadImageFile(TextureManager.GetPathToTexture("environment\\celestial\\moon\\waxing_gibbous.png"), ColorComponents.RedGreenBlueAlpha)
+        };
+
+        moonRenderer.material = new Material("Moon", texture: new Texture2DArray(moonPhasesTextures, "moon", TextureSampleType.Nearest), blendMode: BlendMode.Blend, useDepth: false, transformMode: RenderTranformMode.LocalTransform, renderOrder: -2);
         moonRenderer.material.SetFloat("phase", 0);
 
         // Stars
@@ -96,19 +109,19 @@ public class Sky : ObjectBehavior
 
         var file = Path.Combine(Engine.ProgramDirectory, "Data\\data\\minecraft\\worldgen\\biome\\plains.json").Replace('/', '\\');
 
-        var data = FileParser.ParseJson("plains", File.ReadAllText(file));
+        var data = FileParser.ParseJson(File.ReadAllText(file), "plains");
 
-        var effectsD = data.GetItem("effects");
+        var attributesD = data.GetItem("attributes");
 
-        if (effectsD)
+        if (attributesD)
         {
-            var fColorD = effectsD.GetItem("fog_color");
+            //var fColorD = attributesD.GetItem("fog_color");
 
-            if (fColorD) fog_Color = SplitInt(fColorD.GetValue<int>());
+            //if (fColorD) fog_Color = SplitInt(fColorD.GetValue<int>());
 
-            var sColorD = effectsD.GetItem("sky_color");
+            var sColorD = attributesD.GetItem("minecraft:visual/sky_color");
 
-            if (sColorD) sky_Color = SplitInt(sColorD.GetValue<int>());
+            if (sColorD) sky_Color = (Float3)FromHEX(sColorD.GetValue());
         }
     }
 
@@ -150,6 +163,54 @@ public class Sky : ObjectBehavior
         }
 
         SetMoonPhase(Maths.Mod(TimeOfDay.time / 24000, 8));
+    }
+
+
+    private static Float4 FromHEX(string hex)
+    {
+        var result = new Float4();
+
+        if (hex.ToCharArray()[0] == '#') hex = hex.Remove(0, 1);
+
+        if (hex.Length >= 2) result.r = Convert.ToUInt16(hex.Substring(0, 2), 16) / 255f;
+        if (hex.Length >= 4) result.g = Convert.ToUInt16(hex.Substring(2, 2), 16) / 255f;
+        if (hex.Length >= 6) result.b = Convert.ToUInt16(hex.Substring(4, 2), 16) / 255f;
+        if (hex.Length >= 8) result.a = Convert.ToUInt16(hex.Substring(6, 2), 16) / 255f;
+
+        return result;
+    }
+    private static Float3 SplitInt(int input)
+    {
+        string binary = Convert.ToString(input, 2);
+        binary = binary.PadLeft(24, '0');
+
+        string binaryR = "";
+        string binaryG = "";
+        string binaryB = "";
+
+        int i = 0;
+        foreach (var c in binary.ToCharArray())
+        {
+            if (i < 8)
+            {
+                binaryR += c;
+            }
+            else if (i < 16)
+            {
+                binaryG += c;
+            }
+            else
+            {
+                binaryB += c;
+            }
+            i++;
+        }
+
+        float r = Convert.ToInt32(binaryR, 2) / 255f;
+        float g = Convert.ToInt32(binaryG, 2) / 255f;
+        float b = Convert.ToInt32(binaryB, 2) / 255f;
+
+        return new(r, g, b);
     }
 
     // Minecraft Functions!!!
@@ -233,40 +294,6 @@ public class Sky : ObjectBehavior
         return vertices.ToArray();
     }
 
-    private Float3 SplitInt(int input)
-    {
-        string binary = Convert.ToString(input, 2);
-        binary = binary.PadLeft(24, '0');
-
-        string binaryR = "";
-        string binaryG = "";
-        string binaryB = "";
-
-        int i = 0;
-        foreach (var c in binary.ToCharArray())
-        {
-            if (i < 8)
-            {
-                binaryR += c;
-            }
-            else if(i < 16)
-            {
-                binaryG += c;
-            }
-            else
-            {
-                binaryB += c;
-            }
-            i++;
-        }
-
-        float r = Convert.ToInt32(binaryR, 2) / 255f;
-        float g = Convert.ToInt32(binaryG, 2) / 255f;
-        float b = Convert.ToInt32(binaryB, 2) / 255f;
-
-        return new(r,g,b);
-    }
-
     public void GenerateSunriseset(float transparency)
     {
         List<Float3> vertices = new();
@@ -289,12 +316,12 @@ public class Sky : ObjectBehavior
         sunRiseSetMesh.DeleteMesh();
         sunRiseSetMesh.LoadRawData(vertices.ToArray(), colors.ToArray());
     }
-    public bool IsSunriseOrSunset(float angleFromY)
+    public static bool IsSunriseOrSunset(float angleFromY)
     {
         float f = Maths.Cos(angleFromY);
         return f >= -0.4F && f <= 0.4F;
     }
-    public Float4 GetSunrisesetColor(float angleFromY)
+    public static Float4 GetSunrisesetColor(float angleFromY)
     {
         float angle = Maths.Cos(angleFromY);
 
@@ -307,7 +334,7 @@ public class Sky : ObjectBehavior
     }
     public Float3 ComputeFogColor(float angleFromY, int renderDistance)//, float darkenAmount)
     {
-        float blend = 0.25F + 0.75F * (float)renderDistance / 32.0F;
+        float blend = 0.25F + 0.75F * renderDistance / 32.0F;
         blend = 1.0F - (float)Math.Pow((double)blend, 0.25);
 
         float brightness = Maths.Clamp(Maths.Cos(angleFromY), 0.0F, 1.0F);

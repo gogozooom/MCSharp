@@ -31,7 +31,7 @@ public static class Minecraft
         SceneManager.sceneLoaded += OnSceneLoad;
     }
 
-    const string WorkingVersion = "1.21.10";
+    const string WorkingVersion = "26.3";
     static bool VerifyMCDataVersion()
     {
         if (!Directory.Exists("Data"))
@@ -46,7 +46,7 @@ public static class Minecraft
             return false;
         }
         
-        var json = FileParser.ParseJson("Version", File.ReadAllText("Data\\version.json"));
+        var json = FileParser.ParseJson(File.ReadAllText("Data\\version.json"), "Version");
         var id = json.GetItem("id");
 
         if (id == null)

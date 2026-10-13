@@ -11,7 +11,7 @@ public static class BlockTypeManager
         blockData.Clear();
 
         BaseBlock[] blocks = [ // TODO: Move to json files
-            new Block("minecraft:air", "Air", MinecraftJsonManager.GetData("models/block/air")),
+            new Block("minecraft:air", "Air", "models/block/air"),
             new FullBlock(), // Null
             new FullBlock("minecraft:bedrock", "Bedrock", "models/block/bedrock"),
             new FullBlock("minecraft:dirt", "Dirt", "models/block/dirt"),
