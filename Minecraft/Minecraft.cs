@@ -46,7 +46,7 @@ public static class Minecraft
             return false;
         }
         
-        var json = FileParser.ParseJson("Version", File.ReadAllText("Data\\version.json"));
+        var json = FileParser.ParseJson(File.ReadAllText("Data\\version.json"), "Version");
         var id = json.GetItem("id");
 
         if (id == null)

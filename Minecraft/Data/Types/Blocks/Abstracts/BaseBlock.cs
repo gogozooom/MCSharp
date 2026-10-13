@@ -47,9 +47,9 @@ public abstract class BaseBlock
     }
     private static void GenerateNullData()
     {
-        var data = "{{\"parent\": \"minecraft:block/cube_all\",\"textures\": {\"all\": \"minecraft:null\"}}";
+        var data = "{\"parent\": \"minecraft:block/cube_all\",\"textures\": {\"all\": \"minecraft:null\"}}";
 
-        _nullData = FileParser.ParseJson("NULL", data);
+        _nullData = FileParser.ParseJson(data, "NULL");
 
         MinecraftJsonManager.FullyPopulateData(ref _nullData, "models/");
     }

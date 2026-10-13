@@ -20,7 +20,7 @@ public static class MinecraftJsonManager
 
         var data = File.ReadAllText(file);
 
-        var results = FileParser.ParseJson(id, data, false);
+        var results = FileParser.ParseJson(data, id);
 
         allData.Add(id, results);
 
@@ -62,16 +62,22 @@ public static class MinecraftJsonManager
         return data;
     }
 
-    public static DynamicData PopulateReferences(ref DynamicData data)
+    public static void PopulateReferences(ref DynamicData data)
     {
-        List<DynamicData> allValues = data.GetAllValues();
+        var texturesD = data.GetItem("textures");
+
+        if (!texturesD) return;
+
+        var elementsD = data.GetItem("elements");
+
+        if (!elementsD) return;
 
         Dictionary<string, DynamicData> independentValues = new();
         List<DynamicData> dependentValues = new();
 
-        foreach (var value in allValues)
+        foreach (var value in texturesD.GetAllValues(true))
         {
-            if (value.GetValue<string>().Contains("#"))
+            if (value.GetDataType() == DataType.Value && value.GetValue<string>().Contains('#'))
             {
                 dependentValues.Add(value);
             }
@@ -87,25 +93,44 @@ public static class MinecraftJsonManager
             }
         }
 
-        bool success = false;
+        foreach (var value in elementsD.GetAllValues())
+        {
+            if (value.GetDataType() == DataType.Value && value.GetValue<string>().Contains('#'))
+            {
+                dependentValues.Add(value);
+            }
+        }
 
-        foreach (var value in dependentValues)
+        bool changeMade = false;
+
+        foreach (var value in dependentValues.ToArray())
         {
             var indepS = value.GetValue<string>().Remove(0, 1); // Remove #
 
-            if(!independentValues.TryGetValue(indepS, out var indepD))
-            {
-                //Program.LogWarning($"Unable to populate '#{indepS}' missing independent variable!");
-                continue;
-            }
+            if(!independentValues.TryGetValue(indepS, out var indepD)) continue;
 
-            success = true;
-            value.SetValue(indepD.GetValue<string>());
+            changeMade = true;
+            if(indepD.GetDataType() == DataType.Array)
+            {
+                value.SetValue(indepD);
+            }
+            else
+            {
+                value.SetValue(indepD.GetValue<string>());
+            }
+            dependentValues.Remove(value);
         }
 
-        if (!success) return data;
+        if (!changeMade)
+        {
+            if(dependentValues.Count > 0)
+            {
+                Engine.LogWarning($"Some properties in '{data}' where not populated!");
+            }
+            return;
+        }
 
         // Repeat
-        return PopulateReferences(ref data);
+        PopulateReferences(ref data);
     }
 }

@@ -78,6 +78,11 @@ public static class TextureManager
 
     public static int GetTextureID(string textureName)
     {
+        if (textureName == null)
+        {
+            Engine.LogError("TextureAtlasManager: Requested texture name of null");
+            return 0;
+        }
         if (!textureName.Contains(':')) textureName = "minecraft:" + textureName;
         if (textureName.Contains('#')) return 0;
 

@@ -109,7 +109,7 @@ public class Sky : ObjectBehavior
 
         var file = Path.Combine(Engine.ProgramDirectory, "Data\\data\\minecraft\\worldgen\\biome\\plains.json").Replace('/', '\\');
 
-        var data = FileParser.ParseJson("plains", File.ReadAllText(file));
+        var data = FileParser.ParseJson(File.ReadAllText(file), "plains");
 
         var attributesD = data.GetItem("attributes");
 
